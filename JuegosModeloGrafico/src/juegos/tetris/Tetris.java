@@ -1,9 +1,9 @@
 package juegos.tetris;
 
-import juegos.Estadisticas;
 import juegos.Juego;
 import juegos.Jugable;
 import juegos.Jugador;
+import juegos.Puntuacion;
 import juegos.estilo.BotonArcade;
 import juegos.estilo.Colores;
 import juegos.estilo.EstiloArcade;
@@ -29,15 +29,15 @@ public class Tetris extends Juego implements Jugable {
     private JLabel[] lblNombres;
     private JLabel[] lblPuntos;
 
-    public Tetris(JFrame menu, Estadisticas estadisticas) {
-        super("Tetris por turnos", menu, estadisticas);
+    public Tetris(JFrame menu) {
+        super("Tetris por turnos", menu);
         this.tablero = new TableroTetris();
         this.celdas = new JLabel[TableroTetris.ALTO][TableroTetris.ANCHO];
     }
 
-    //metodo de la interfaz Jugable: aqui arranca el juego
+    //metodo de la interfaz Jugable: aqui arranca el juego y al final DEVUELVE la puntuacion
     @Override
-    public void start() {
+    public Puntuacion start() {
         reiniciar(); //por si ya se habia jugado antes
         this.tablero = new TableroTetris();
         this.celdas = new JLabel[TableroTetris.ALTO][TableroTetris.ANCHO];
@@ -45,12 +45,12 @@ public class Tetris extends Juego implements Jugable {
         int cantidad = elegirNumero("¿Cuántos jugadores?", 2, 4);
         if (cantidad == -1 || !pedirJugadores(cantidad)) {
             cancelar();
-            return;
+            return null; //no hay puntuacion
         }
         this.rondas = elegirNumero("¿Cuántas piezas pone cada jugador?", 3, 10);
         if (this.rondas == -1) {
             cancelar();
-            return;
+            return null;
         }
 
         armarVentana();
@@ -58,6 +58,8 @@ public class Tetris extends Juego implements Jugable {
         this.rondaActual = 1;
         this.turno = 0;
         nuevaPieza();
+
+        return esperarResultado(); //espera a que termine el juego y devuelve la puntuacion
     }
 
     private void armarVentana() {
@@ -125,7 +127,6 @@ public class Tetris extends Juego implements Jugable {
         abajo.add(btnSoltar);
         add(abajo, BorderLayout.SOUTH);
 
-        setVisible(true);
     }
 
     //----------------- logica de los turnos -----------------

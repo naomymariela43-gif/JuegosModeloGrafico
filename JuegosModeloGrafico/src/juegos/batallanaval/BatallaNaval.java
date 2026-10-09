@@ -1,9 +1,9 @@
 package juegos.batallanaval;
 
-import juegos.Puntuacion;
 import juegos.Juego;
 import juegos.Jugable;
 import juegos.Jugador;
+import juegos.Puntuacion;
 import juegos.estilo.BotonArcade;
 import juegos.estilo.Colores;
 import juegos.estilo.EstiloArcade;
@@ -31,29 +31,32 @@ public class BatallaNaval extends Juego implements Jugable {
     private boolean horizontal;
     private long inicioTurno;
 
-    public BatallaNaval(JFrame menu, Estadisticas estadisticas) {
-        super("Batalla Naval", menu, estadisticas);
+    public BatallaNaval(JFrame menu) {
+        super("Batalla Naval", menu);
         this.tableros = new LinkedList<>();
         this.botones = new JButton[Tablero.TAMANO][Tablero.TAMANO];
     }
 
-    //metodo de la interfaz Jugable: aqui arranca el juego
+    //metodo de la interfaz Jugable: aqui arranca el juego y al final DEVUELVE la puntuacion
     @Override
-    public void start() {
+    public Puntuacion start() {
         reiniciar(); //por si ya se habia jugado antes
         this.tableros = new LinkedList<>();
         this.botones = new JButton[Tablero.TAMANO][Tablero.TAMANO];
 
         if (!pedirJugadores(2)) {
             cancelar(); //cancelo, se vuelve al menu
-            return;
+            return null; //no hay puntuacion
         }
         this.tableros.add(new Tablero());
         this.tableros.add(new Tablero());
 
         armarVentana();
         comenzarCronometro();
-        empezarColocacion(0);
+        //invokeLater: empezarColocacion se ejecuta apenas la ventana ya se este viendo
+        SwingUtilities.invokeLater(() -> empezarColocacion(0));
+
+        return esperarResultado(); //espera a que termine el juego y devuelve la puntuacion
     }
 
     private void armarVentana() {
@@ -104,14 +107,13 @@ public class BatallaNaval extends Juego implements Jugable {
             actualizarTextos();
         });
         JLabel leyenda = EstiloArcade.crearTexto("<html><font color='" + Colores.hex(Colores.ROJO) + "'>X = TOCADO</font>"
-                + " &nbsp; <font color='" + Colores.hex(Colores.AZUL) + "'>O = AGUA</font>"
-                + " &nbsp; <font color='" + Colores.hex(Colores.GRIS) + "'>TOCADO 10 PTS &nbsp; HUNDIDO 30 PTS</font></html>",
+                        + " &nbsp; <font color='" + Colores.hex(Colores.AZUL) + "'>O = AGUA</font>"
+                        + " &nbsp; <font color='" + Colores.hex(Colores.GRIS) + "'>TOCADO 10 PTS &nbsp; HUNDIDO 30 PTS</font></html>",
                 Colores.GRIS, 13);
         abajo.add(btnDireccion);
         abajo.add(leyenda);
         add(abajo, BorderLayout.SOUTH);
 
-        setVisible(true);
     }
 
     private void clicCasilla(int fila, int columna) {

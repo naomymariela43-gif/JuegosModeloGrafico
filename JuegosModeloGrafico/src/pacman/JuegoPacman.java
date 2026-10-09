@@ -1,7 +1,7 @@
 package pacman;
 
-import juegos.Estadisticas;
 import juegos.Jugable;
+import juegos.Puntuacion;
 import matriz.PartidaMatriz;
 
 import javax.swing.JFrame;
@@ -11,11 +11,9 @@ import javax.swing.JFrame;
  */
 public class JuegoPacman implements Jugable {
     private final JFrame menu;
-    private final Estadisticas estadisticas;
 
-    public JuegoPacman(JFrame menu, Estadisticas estadisticas) {
+    public JuegoPacman(JFrame menu) {
         this.menu = menu;
-        this.estadisticas = estadisticas;
     }
 
     @Override
@@ -24,12 +22,12 @@ public class JuegoPacman implements Jugable {
     }
 
     @Override
-    public void start() {
+    public Puntuacion start() {
         String instrucciones = "MUEVE A PACMAN CON LAS FLECHAS O W A S D.\n"
                 + "COME TODOS LOS PUNTOS +.\n"
                 + "AL COMER UN PODER * LOS FANTASMAS SE VUELVEN HUECOS,\n"
                 + "SE MUEVEN LENTO Y PUEDES COMERTELOS.\n"
                 + "TIENES " + PanelPacman.VIDAS + " VIDAS.  Q O ESC = RENDIRSE.";
-        PartidaMatriz.jugar(menu, estadisticas, getNombre(), instrucciones, PanelPacman::new);
+        return PartidaMatriz.jugar(menu, getNombre(), instrucciones, PanelPacman::new);
     }
 }

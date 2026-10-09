@@ -1,7 +1,7 @@
 package snake;
 
-import juegos.Estadisticas;
 import juegos.Jugable;
+import juegos.Puntuacion;
 import matriz.PartidaMatriz;
 
 import javax.swing.JFrame;
@@ -12,11 +12,9 @@ import javax.swing.JFrame;
  */
 public class JuegoSnake implements Jugable {
     private final JFrame menu;
-    private final Estadisticas estadisticas;
 
-    public JuegoSnake(JFrame menu, Estadisticas estadisticas) {
+    public JuegoSnake(JFrame menu) {
         this.menu = menu;
-        this.estadisticas = estadisticas;
     }
 
     @Override
@@ -25,12 +23,12 @@ public class JuegoSnake implements Jugable {
     }
 
     @Override
-    public void start() {
+    public Puntuacion start() {
         String instrucciones = "LA SERPIENTE AVANZA SOLA.\n"
                 + "USA LAS FLECHAS O W A S D PARA GIRAR.\n"
                 + "COME MANZANAS (BOLITAS ROJAS). META: " + PanelSnake.META_MANZANAS + " MANZANAS.\n"
                 + "NO CHOQUES CON LAS PAREDES NI CONTIGO MISMA.\n"
                 + "Q O ESC = RENDIRSE.";
-        PartidaMatriz.jugar(menu, estadisticas, getNombre(), instrucciones, PanelSnake::new);
+        return PartidaMatriz.jugar(menu, getNombre(), instrucciones, PanelSnake::new);
     }
 }
