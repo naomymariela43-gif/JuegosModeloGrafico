@@ -38,13 +38,13 @@ public class Consola extends JFrame {
     //==================================================================
     private void cargarJuegos() {
         //nuestros juegos
-        insertarJuego(new BatallaNaval(this, estadisticas));
-        insertarJuego(new Tetris(this, estadisticas));
+        insertarJuego(new BatallaNaval(this));
+        insertarJuego(new Tetris(this));
 
         //juegos de los compañeros
-        insertarJuego(new JuegoSnake(this, estadisticas));
-        insertarJuego(new JuegoPacman(this, estadisticas));
-        insertarJuego(new JuegoCityBlock(estadisticas));
+        insertarJuego(new JuegoSnake(this));
+        insertarJuego(new JuegoPacman(this));
+        insertarJuego(new JuegoCityBlock());
 
         //ej. de como se agrega otro:
         //insertarJuego(new ahorcado.Ahorcado());
@@ -58,6 +58,7 @@ public class Consola extends JFrame {
         if (objeto instanceof Jugable) {
             Jugable juego = (Jugable) objeto; //se convierte a Jugable para poder guardarlo
             this.juegos.add(juego);
+            this.estadisticas.agregarJuego(juego.getNombre()); //cada juego tiene su ranking (top 3)
             System.out.println("[CONSOLA] Juego insertado: " + juego.getNombre());
             return true;
         } else {
@@ -67,11 +68,31 @@ public class Consola extends JFrame {
         }
     }
 
-    //arranca el juego que esta en esa posicion con su metodo fijo start()
+    //arranca el juego que esta en esa posicion con su metodo fijo start(),
+    //recibe la Puntuacion que devuelve y la registra en las estadisticas
     public void jugar(int indice) {
         if (indice >= 0 && indice < this.juegos.size()) {
-            this.juegos.get(indice).start();
+            Puntuacion puntuacion = this.juegos.get(indice).start(); //el juego devuelve su puntuacion
+            registrarEstadistica(puntuacion);
         }
+    }
+
+    //REGISTRAR: la consola compara la puntuacion con el top 3 de ese juego
+    public void registrarEstadistica(Puntuacion puntuacion) {
+        if (puntuacion == null) {
+            return; //se cancelo o no se termino el juego: no hay nada que registrar
+        }
+        int lugar = this.estadisticas.registrar(puntuacion);
+
+        String mensaje;
+        if (lugar > 0) {
+            mensaje = "¡NUEVO RECORD!\n\n" + puntuacion.getJugador() + " entra al TOP 3 de "
+                    + puntuacion.getJuego() + "\nen el lugar #" + lugar + " con " + puntuacion.getPuntos() + " puntos";
+        } else {
+            mensaje = puntuacion.getJugador() + " hizo " + puntuacion.getPuntos() + " puntos,\n"
+                    + "pero no alcanzo para entrar al TOP 3 de " + puntuacion.getJuego();
+        }
+        JOptionPane.showMessageDialog(this, mensaje.toUpperCase(), "Estadisticas", JOptionPane.PLAIN_MESSAGE);
     }
 
     public LinkedList<Jugable> getJuegos() {
@@ -178,7 +199,7 @@ public class Consola extends JFrame {
     }
 
     private void mostrarEstadisticas() {
-        String texto = "========= ESTADISTICAS =========\n\n" + estadisticas.toString();
+        String texto = "====== TOP 3 POR JUEGO ======\n\n" + estadisticas.toString();
         JOptionPane.showMessageDialog(this, EstiloArcade.crearPantallaTexto(texto.toUpperCase(), 560, 340),
                 "Estadisticas", JOptionPane.PLAIN_MESSAGE);
     }

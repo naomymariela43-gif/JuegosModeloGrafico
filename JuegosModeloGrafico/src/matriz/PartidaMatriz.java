@@ -1,7 +1,7 @@
 package matriz;
 
-import juegos.Estadisticas;
 import juegos.Jugador;
+import juegos.Puntuacion;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -16,7 +16,7 @@ import java.util.function.Function;
 //Hace lo que antes hacian Juego.start() + VentanaJuego pero con ventanitas Swing en vez de Scanner:
 //  1) pregunta cuantos jugadores y sus nombres
 //  2) cada jugador juega su turno en una ventana (modal: espera a que se cierre)
-//  3) elige al ganador, guarda el resumen en las Estadisticas de la consola y lo muestra
+//  3) elige al ganador, muestra el resumen y DEVUELVE la Puntuacion del ganador
 //IMPORTANTE: se llama desde el boton del menu, o sea YA estamos en el hilo de Swing (EDT),
 //por eso aqui NO se usa invokeAndWait (daria error estando en el EDT).
 public final class PartidaMatriz {
@@ -24,15 +24,15 @@ public final class PartidaMatriz {
     private PartidaMatriz() {
     }
 
-    public static void jugar(JFrame menu, Estadisticas estadisticas, String nombreJuego,
-                             String instrucciones, Function<Jugador, PanelJuego> crearPanel) {
+    public static Puntuacion jugar(JFrame menu, String nombreJuego,
+                                   String instrucciones, Function<Jugador, PanelJuego> crearPanel) {
         JOptionPane.showMessageDialog(menu, instrucciones, nombreJuego, JOptionPane.PLAIN_MESSAGE);
 
         String[] cantidades = {"1", "2", "3", "4"};
         int eleccion = JOptionPane.showOptionDialog(menu, "CUANTOS JUGADORES?", nombreJuego,
                 JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, cantidades, cantidades[0]);
         if (eleccion == -1) {
-            return; //cerro la ventanita: se cancela
+            return null; //cerro la ventanita: se cancela, no hay puntuacion
         }
         int cantidad = eleccion + 1;
 
@@ -41,7 +41,7 @@ public final class PartidaMatriz {
             String nombre = JOptionPane.showInputDialog(menu, "NOMBRE DEL JUGADOR " + i + ":",
                     nombreJuego, JOptionPane.PLAIN_MESSAGE);
             if (nombre == null) {
-                return;
+                return null;
             }
             nombre = nombre.trim();
             if (nombre.isEmpty()) {
@@ -85,9 +85,11 @@ public final class PartidaMatriz {
                 + "Tiempo total: " + ((System.currentTimeMillis() - inicio) / 1000) + " seg\n"
                 + "Jugadores:\n" + detalle;
 
-        estadisticas.agregarPartida(resumen);
         JOptionPane.showMessageDialog(menu, ("========= GAME OVER =========\n\n" + resumen).toUpperCase(),
                 "Fin de la partida", JOptionPane.PLAIN_MESSAGE);
+
+        //se devuelve la puntuacion del mejor jugador (si empataron, la del primero)
+        return new Puntuacion(nombreJuego, mejor.getNombre(), mejorPuntos);
     }
 
     //abre el panel en una ventana modal: setVisible(true) no regresa hasta que se cierra
