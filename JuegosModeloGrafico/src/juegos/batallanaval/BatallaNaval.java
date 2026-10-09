@@ -1,6 +1,6 @@
 package juegos.batallanaval;
 
-import juegos.Estadisticas;
+import juegos.Puntuacion;
 import juegos.Juego;
 import juegos.Jugable;
 import juegos.Jugador;

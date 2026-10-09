@@ -6,25 +6,29 @@ import juegos.estilo.EstiloArcade;
 import javax.swing.*;
 import java.util.LinkedList;
 
-//Clase abstracta: cada juego es una ventana (JFrame) con nombre, jugadores, ganador y tiempo.
+//Clase abstracta: cada juego es una ventana con nombre, jugadores, ganador y tiempo.
 //Aqui esta todo lo que comparten los juegos. Lo que los hace JUGABLES es la interfaz Jugable.
-public abstract class Juego extends JFrame {
+//
+//Es un JDialog MODAL (antes era JFrame): cuando se hace setVisible(true) el codigo se queda
+//esperando ahi hasta que la ventana se cierre. Asi start() puede esperar a que termine el juego
+//y despues DEVOLVER la Puntuacion.
+public abstract class Juego extends JDialog {
     private String nombre;
     protected LinkedList<Jugador> jugadores;
     protected String ganador;
     private long tiempoTotal;
     private long inicioPartida;
     private JFrame menu;
-    private Estadisticas estadisticas;
+    private Puntuacion puntuacion; //lo que va a devolver start() (null mientras no termine)
 
-    public Juego(String nombre, JFrame menu, Estadisticas estadisticas) {
-        super(nombre);
+    public Juego(String nombre, JFrame menu) {
+        super(menu, nombre, true); //true = modal: espera hasta que se cierre
         this.nombre = nombre;
         this.jugadores = new LinkedList<>();
         this.ganador = "Nadie";
         this.tiempoTotal = 0;
         this.menu = menu;
-        this.estadisticas = estadisticas;
+        this.puntuacion = null;
 
         getContentPane().setBackground(Colores.FONDO);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE); //al cerrar solo se cierra el juego, no el menu
@@ -35,6 +39,7 @@ public abstract class Juego extends JFrame {
         this.jugadores = new LinkedList<>();
         this.ganador = "Nadie";
         this.tiempoTotal = 0;
+        this.puntuacion = null;
         getContentPane().removeAll(); //borra lo que tenia la ventana de la partida anterior
     }
 
@@ -94,10 +99,31 @@ public abstract class Juego extends JFrame {
         this.inicioPartida = System.currentTimeMillis();
     }
 
-    //guarda la partida en las estadisticas, muestra el resumen y vuelve al menu
+    //muestra la ventana del juego y ESPERA a que se cierre. Despues devuelve la puntuacion.
+    //Cada juego lo usa al final de su start():   return esperarResultado();
+    public Puntuacion esperarResultado() {
+        setVisible(true);        //como es modal, aqui se queda esperando mientras se juega
+        return this.puntuacion;  //si cerraron la ventana sin terminar, sigue en null
+    }
+
+    //crea la Puntuacion del ganador. Si hubo empate, usa al primero con mas puntos.
+    public Puntuacion crearPuntuacion() {
+        Jugador mejor = this.jugadores.get(0);
+        for (int i = 0; i < this.jugadores.size(); i++) {
+            if (this.jugadores.get(i).getNombre().equals(this.ganador)) {
+                return new Puntuacion(nombre, this.jugadores.get(i).getNombre(), this.jugadores.get(i).getPuntos());
+            }
+            if (this.jugadores.get(i).getPuntos() > mejor.getPuntos()) {
+                mejor = this.jugadores.get(i);
+            }
+        }
+        return new Puntuacion(nombre, mejor.getNombre(), mejor.getPuntos());
+    }
+
+    //arma la puntuacion, muestra el resumen y cierra la ventana del juego
     public void terminarPartida() {
         this.tiempoTotal = System.currentTimeMillis() - inicioPartida;
-        this.estadisticas.agregarPartida(this.toString());
+        this.puntuacion = crearPuntuacion();
 
         String texto = "========= GAME OVER =========\n\n" + this.toString();
         JOptionPane.showMessageDialog(this, EstiloArcade.crearPantallaTexto(texto.toUpperCase(), 560, 220),

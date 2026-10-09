@@ -2,32 +2,40 @@ package juegos;
 
 import java.util.LinkedList;
 
-//Guarda el resumen (texto) de todas las partidas que se han jugado
 public class Estadisticas {
-    private LinkedList<String> partidas;
+    private LinkedList<Ranking> rankings;
 
     public Estadisticas() {
-        this.partidas = new LinkedList<>();
+        this.rankings = new LinkedList<>();
     }
 
-    //se guarda el texto del resultado en el momento en que termina la partida
-    public void agregarPartida(String resumen) {
-        this.partidas.add(resumen);
+    public void agregarJuego(String nombreJuego) {
+        if (buscarRanking(nombreJuego) == null) {
+            this.rankings.add(new Ranking(nombreJuego));
+        }
     }
 
-    public LinkedList<String> getPartidas() {
-        return partidas;
+    public Ranking buscarRanking(String nombreJuego) {
+        for (int i = 0; i < this.rankings.size(); i++) {
+            if (this.rankings.get(i).getJuego().equals(nombreJuego)) {
+                return this.rankings.get(i);
+            }
+        }
+        return null;
+    }
+
+    public int registrar(Puntuacion puntuacion) {
+        agregarJuego(puntuacion.getJuego());
+        return buscarRanking(puntuacion.getJuego()).registrar(puntuacion);
     }
 
     @Override
     public String toString() {
-        if (this.partidas.isEmpty()) {
-            return "Todavia no se ha jugado ninguna partida.";
+        if (this.rankings.isEmpty()) return "La consola no tiene juegos.";
+        String texto = "";
+        for (int i = 0; i < this.rankings.size(); i++) {
+            texto += this.rankings.get(i).toString() + "\n";
         }
-        String contenido = "";
-        for (int i = 0; i < this.partidas.size(); i++) {
-            contenido += "----- Partida " + (i + 1) + " -----\n" + this.partidas.get(i) + "\n";
-        }
-        return contenido;
+        return texto;
     }
 }

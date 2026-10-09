@@ -12,7 +12,7 @@ package juegos;
 public interface Jugable {
 
     //metodo inicial fijo: el menu lo llama para arrancar el juego
-    void start();
+    Puntuacion start();
 
     //nombre que aparece en el boton del menu.
     //Es "default": si el juego no lo escribe, se usa el nombre de la clase (ej. "Ahorcado").
