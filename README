@@ -1,0 +1,100 @@
+# Consola de Juegos
+
+Consola de juegos por turnos hecha en Java con estilo retro arcade, e interfas grafica.
+Desde un menú se lanzan varios juegos, y al terminar cada partida la consola
+registra la puntuación del ganador en un Top 3 por juego.
+
+> Estudiante: Mariela RM
+> Curso: POO
+
+## Juegos incluidos
+
+| Juego | Package | Cómo se juega |
+|---|---|---|
+| Batalla Naval | `juegos.batallanaval` | Ventana, 2 jugadores, con el mouse |
+| Tetris por turnos | `juegos.tetris` | Ventana, 2 a 4 jugadores, con botones |
+| Snake | `snake` | Ventana, 1 a 4 jugadores, con flechas o WASD |
+| Pacman | `pacman` | Ventana, 1 a 4 jugadores, con flechas o WASD |
+| City Block | `cityblock` | Consola de texto (pestaña Run de IntelliJ) |
+
+## Cómo ejecutarlo
+
+1. Abrir la carpeta del proyecto en IntelliJ IDEA con "File > Open".
+2. Usar un JDK 17 o superior (*File → Project Structure → SDK*).
+3. Clic derecho en `JuegosModeloGrafico/src/Main.java` → **Run 'Main.main()'**.
+
+## Menú de la consola
+
+- **Lanzar Juego**: muestra la lista de juegos y arranca el elegido con su método `start()`.
+- **Ver Estadísticas**: muestra, por cada juego, su Top 3 actual.
+- **Salir**.
+
+## Interfaces
+
+### `Jugable`
+
+Es el contrato que cumplen todos los juegos. La consola solo acepta objetos
+`Jugable` (lo revisa con `instanceof`); cualquier otro objeto se rechaza.
+
+```java
+public interface Jugable {
+    Puntuacion start();              // arranca el juego y, al terminar, devuelve la puntuación
+    default String getNombre() {...} // nombre que sale en el menú
+}
+```
+
+`start()` debe **esperar** a que el juego termine. Devuelve la `Puntuacion` del
+ganador, o `null` si el juego se canceló.
+
+### `PuntComparable`
+
+Sirve para comparar puntuaciones. La implementa la clase `Puntuacion`.
+
+```java
+public interface PuntComparable {
+    int comparar(Puntuacion otra);   // > 0 mejor, < 0 peor, 0 iguales
+}
+```
+
+## Estadísticas (Top 3 por juego)
+
+1. Al terminar un juego, su `start()` devuelve un objeto `Puntuacion` (juego, jugador, puntos).
+2. La consola **registra** la estadística: la compara con `comparar()` contra el Top 3 de ese juego.
+3. Si es mejor que alguna, entra en ese lugar y la última sale del Top 3.
+4. **Ver Estadísticas** muestra el Top 3 actual de cada juego.
+
+Cada Top 3 empieza con un **escenario ficticio** (puntuaciones de "CPU" con 30,
+20 y 10 puntos), para que las estadísticas nunca estén vacías.
+
+Clases involucradas: `Puntuacion`, `Ranking` (el Top 3 de un juego) y
+`Estadisticas` (un `Ranking` por cada juego de la consola).
+
+## Estructura del proyecto
+
+```
+JuegosModeloGrafico/src/
+├── Main.java                 → arranca la consola
+├── juegos/                   → la consola y lo común
+│   ├── Consola.java          → menú, inserta y lanza juegos, registra estadísticas
+│   ├── Jugable.java          → interfaz de los juegos
+│   ├── PuntComparable.java   → interfaz para comparar puntuaciones
+│   ├── Puntuacion.java       → lo que devuelve cada juego
+│   ├── Ranking.java          → Top 3 de un juego
+│   ├── Estadisticas.java     → todos los Top 3
+│   ├── Juego.java, Jugador.java
+│   ├── estilo/               → colores, botones y textos arcade
+│   ├── batallanaval/
+│   └── tetris/
+├── snake/  pacman/  matriz/  → juegos de compañeros (matriz = código común)
+└── cityblock/                → juego de compañeros por texto
+```
+
+## Cómo agregar un juego nuevo
+
+1. Copiar el package del juego dentro de `JuegosModeloGrafico/src`.
+2. Su clase principal debe hacer `implements Jugable` y tener `public Puntuacion start()`.
+3. En `Consola.java`, dentro de `cargarJuegos()`, agregar:
+```java
+   insertarJuego(new mipaquete.MiJuego());
+```
+4. Al correr el programa, el juego aparece solo en **Lanzar Juego** y en **Ver Estadísticas**.
