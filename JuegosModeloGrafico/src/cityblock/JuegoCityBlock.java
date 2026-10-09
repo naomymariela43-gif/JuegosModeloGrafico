@@ -1,56 +1,84 @@
 package cityblock;
 
+import java.awt.Frame;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import java.util.Scanner;
+import javax.swing.BorderFactory;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import cityblock.comun.Colores;
 import cityblock.comun.Estadistica;
 import cityblock.comun.Juego;
-import juegos.Estadisticas;
-import juegos.Jugable;
 import cityblock.comun.Jugador;
+import juegos.Jugable;
+import juegos.Puntuacion;
+import juegos.estilo.EstiloArcade;
 
 /** Juego 2: City Block (estilo Tower Bloxx) por turnos. */
 public class JuegoCityBlock extends Juego implements Jugable {
 
-    private final Estadisticas estadisticas;
-    private boolean enCurso = false; //evita abrir dos partidas a la vez
+    private boolean termino; //true solo si la partida llego hasta el final
 
-    public JuegoCityBlock(Estadisticas estadisticas) {
+    public JuegoCityBlock() {
         super("City Block", new Scanner(System.in));
-        this.estadisticas = estadisticas;
     }
 
     // =================== JUEGO: CITY BLOCK ===================
-    //Este juego se juega por TEXTO (Scanner). Como el menu es grafico, start() corre la partida
-    //en un hilo aparte para no congelar la ventana, y se juega en la consola de IntelliJ (pestana Run).
+    //Este juego se juega por TEXTO (Scanner) en la consola de IntelliJ (pestana Run).
+    //La partida corre en un hilo aparte y mientras tanto se muestra una ventanita MODAL:
+    //start() se queda esperando ahi (sin congelar las ventanas) hasta que la partida termina,
+    //y despues DEVUELVE la puntuacion.
     @Override
-    public void start() {
-        if (enCurso) {
-            JOptionPane.showMessageDialog(null, "CITY BLOCK YA ESTA EN CURSO.\nREVISA LA CONSOLA (PESTANA RUN).",
-                    "City Block", JOptionPane.PLAIN_MESSAGE);
-            return;
-        }
+    public Puntuacion start() {
         JOptionPane.showMessageDialog(null, "CITY BLOCK SE JUEGA EN LA CONSOLA DE TEXTO.\n"
-                + "ABRE LA PESTANA RUN DE INTELLIJ Y SIGUE LAS INSTRUCCIONES.",
+                        + "ABRE LA PESTANA RUN DE INTELLIJ Y SIGUE LAS INSTRUCCIONES.",
                 "City Block", JOptionPane.PLAIN_MESSAGE);
-        enCurso = true;
 
+        //ventanita de espera (no se puede cerrar con la X: se cierra sola al terminar la partida)
+        JDialog espera = new JDialog((Frame) null, "City Block", true);
+        espera.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        JLabel texto = new JLabel("CITY BLOCK EN CURSO... JUEGA EN LA PESTANA RUN", SwingConstants.CENTER);
+        texto.setFont(EstiloArcade.fuente(16));
+        texto.setForeground(juegos.estilo.Colores.VERDE);
+        texto.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
+        espera.add(texto);
+        espera.pack();
+        espera.setLocationRelativeTo(null);
+
+        termino = false;
         Thread hilo = new Thread(() -> {
             try {
                 System.out.println(Colores.AZUL + ">>> CITY BLOCK <<<" + Colores.RESET);
                 correrPartida();
-                if (getUltimaEstadistica() != null) {
-                    String resumen = "Juego: City Block\n" + getUltimaEstadistica().toString() + "\n";
-                    SwingUtilities.invokeLater(() -> estadisticas.agregarPartida(resumen));
-                }
+                termino = true;
             } finally {
-                enCurso = false;
+                SwingUtilities.invokeLater(espera::dispose); //cierra la ventanita y start() sigue
             }
         });
         hilo.start();
+
+        espera.setVisible(true); //como es modal, aqui se espera hasta que termine la partida
+
+        if (!termino) {
+            return null; //no se termino la partida: no hay puntuacion
+        }
+        return crearPuntuacion();
+    }
+
+    //la puntuacion del jugador con mas puntos (si empatan, la del primero)
+    private Puntuacion crearPuntuacion() {
+        Jugador mejor = jugadores.get(0);
+        for (Jugador j : jugadores) {
+            if (j.getPuntos() > mejor.getPuntos()) {
+                mejor = j;
+            }
+        }
+        return new Puntuacion(getNombre(), mejor.getNombre(), mejor.getPuntos());
     }
     // =========================================================
 
