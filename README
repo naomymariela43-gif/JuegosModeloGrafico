@@ -12,26 +12,26 @@ registra la puntuación del ganador en un Top 3 por juego.
 | Juego | Package | Cómo se juega |
 |---|---|---|
 | Batalla Naval | `juegos.batallanaval` | Ventana, 2 jugadores, con el mouse |
-| Tetris por turnos | `juegos.tetris` | Ventana, 2 a 4 jugadores, con botones |
+| Tetris por turnos | `juegos.tetris` | Ventana, 2 a 4 jugadores, con teclado |
 | Snake | `snake` | Ventana, 1 a 4 jugadores, con flechas o WASD |
 | Pacman | `pacman` | Ventana, 1 a 4 jugadores, con flechas o WASD |
 | City Block | `cityblock` | Consola de texto (pestaña Run de IntelliJ) |
 
-## Cómo ejecutarlo
+- Cómo ejecutarlo
 
 1. Abrir la carpeta del proyecto en IntelliJ IDEA con "File > Open".
 2. Usar un JDK 17 o superior (*File → Project Structure → SDK*).
 3. Clic derecho en `JuegosModeloGrafico/src/Main.java` → **Run 'Main.main()'**.
 
-## Menú de la consola
+-- Menú de la consola
 
 - **Lanzar Juego**: muestra la lista de juegos y arranca el elegido con su método `start()`.
 - **Ver Estadísticas**: muestra, por cada juego, su Top 3 actual.
 - **Salir**.
 
-## Interfaces
+-- Interfaces
 
-### `Jugable`
+- `Jugable`
 
 Es el contrato que cumplen todos los juegos. La consola solo acepta objetos
 `Jugable` (lo revisa con `instanceof`); cualquier otro objeto se rechaza.
@@ -46,7 +46,7 @@ public interface Jugable {
 `start()` debe **esperar** a que el juego termine. Devuelve la `Puntuacion` del
 ganador, o `null` si el juego se canceló.
 
-### `PuntComparable`
+- `PuntComparable`
 
 Sirve para comparar puntuaciones. La implementa la clase `Puntuacion`.
 
@@ -56,7 +56,7 @@ public interface PuntComparable {
 }
 ```
 
-## Estadísticas (Top 3 por juego)
+- Estadísticas (Top 3 por juego)
 
 1. Al terminar un juego, su `start()` devuelve un objeto `Puntuacion` (juego, jugador, puntos).
 2. La consola **registra** la estadística: la compara con `comparar()` contra el Top 3 de ese juego.
@@ -69,7 +69,7 @@ Cada Top 3 empieza con un **escenario ficticio** (puntuaciones de "CPU" con 30,
 Clases involucradas: `Puntuacion`, `Ranking` (el Top 3 de un juego) y
 `Estadisticas` (un `Ranking` por cada juego de la consola).
 
-## Estructura del proyecto
+-- Estructura del proyecto
 
 ```
 JuegosModeloGrafico/src/
@@ -89,7 +89,7 @@ JuegosModeloGrafico/src/
 └── cityblock/                → juego de compañeros por texto
 ```
 
-## Cómo agregar un juego nuevo
+-- Cómo agregar un juego nuevo
 
 1. Copiar el package del juego dentro de `JuegosModeloGrafico/src`.
 2. Su clase principal debe hacer `implements Jugable` y tener `public Puntuacion start()`.
