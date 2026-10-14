@@ -4,7 +4,7 @@ Consola de juegos por turnos hecha en Java con estilo retro arcade, e interfas g
 Desde un menú se lanzan varios juegos, y al terminar cada partida la consola
 registra la puntuación del ganador en un Top 3 por juego.
 
-> Estudiante: Mariela RM
+> Estudiante: Mariela Ramírez Murillo
 > Curso: POO
 
 ## Juegos incluidos
